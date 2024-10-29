@@ -1,3 +1,4 @@
+import 'package:capstone_v1/screens/start_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:capstone_v1/screens/auth_screen.dart';
 import 'package:capstone_v1/screens/chat_screen.dart';
@@ -40,6 +41,7 @@ class ScreenSelector extends StatelessWidget {
       body: ListView(
         padding: EdgeInsets.all(16),
         children: [
+          _buildScreenButton(context, 'Start Screen', StartScreen()),
           _buildScreenButton(context, 'Login Screen', LoginScreen()),
           _buildScreenButton(
               context, 'Auth Screen', AccountVerificationScreen()),
