@@ -154,7 +154,6 @@ class RouteRecommendationScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: CustomNavigationBar(),
     );
   }
 

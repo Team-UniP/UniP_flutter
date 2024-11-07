@@ -119,7 +119,6 @@ class ChatScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: CustomNavigationBar(),
     );
   }
 

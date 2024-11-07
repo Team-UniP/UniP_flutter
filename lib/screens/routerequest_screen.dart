@@ -100,7 +100,6 @@ class RouteRequestScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: CustomNavigationBar(),
     );
   }
 }

@@ -61,7 +61,6 @@ class ChatlistScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: CustomNavigationBar(),
     );
   }
 }

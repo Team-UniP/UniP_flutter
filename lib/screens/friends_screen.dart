@@ -66,7 +66,6 @@ class FriendsScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: CustomNavigationBar(),
     );
   }
 }

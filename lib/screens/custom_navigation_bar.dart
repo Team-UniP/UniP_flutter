@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 
 class CustomNavigationBar extends StatelessWidget {
+  final int selectedIndex;
+  final Function(int) onItemTapped;
+
+  CustomNavigationBar({
+    required this.selectedIndex,
+    required this.onItemTapped,
+  });
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -17,36 +25,79 @@ class CustomNavigationBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               Expanded(
+                child: GestureDetector(
+                  onTap: () => onItemTapped(0),
                   child: Padding(
-                padding: EdgeInsets.only(top: 10), // 아이콘을 아래로 내림
-                child: _buildNavItem(Icons.home, '홈', Color(0xFFC29FF0)),
-              )),
+                    padding: EdgeInsets.only(top: 10),
+                    child: _buildNavItem(
+                      Icons.home,
+                      '홈',
+                      selectedIndex == 0
+                          ? Color(0xFFC29FF0)
+                          : Color(0xFFD1D1D1),
+                    ),
+                  ),
+                ),
+              ),
               Expanded(
+                child: GestureDetector(
+                  onTap: () => onItemTapped(1),
                   child: Padding(
-                padding: EdgeInsets.only(top: 10),
-                child: _buildNavItem(Icons.chat, '채팅', Color(0xFFD1D1D1)),
-              )),
-              Expanded(child: SizedBox.shrink()), // 가운데 공간 확보를 위해 비워둠
+                    padding: EdgeInsets.only(top: 10),
+                    child: _buildNavItem(
+                      Icons.chat,
+                      '채팅',
+                      selectedIndex == 1
+                          ? Color(0xFFC29FF0)
+                          : Color(0xFFD1D1D1),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(child: SizedBox.shrink()), // 중앙 공간 확보
               Expanded(
+                child: GestureDetector(
+                  onTap: () => onItemTapped(3),
                   child: Padding(
-                padding: EdgeInsets.only(top: 10),
-                child: _buildNavItem(Icons.people, '친구', Color(0xFFD1D1D1)),
-              )),
+                    padding: EdgeInsets.only(top: 10),
+                    child: _buildNavItem(
+                      Icons.people,
+                      '친구',
+                      selectedIndex == 3
+                          ? Color(0xFFC29FF0)
+                          : Color(0xFFD1D1D1),
+                    ),
+                  ),
+                ),
+              ),
               Expanded(
+                child: GestureDetector(
+                  onTap: () => onItemTapped(4),
                   child: Padding(
-                padding: EdgeInsets.only(top: 10),
-                child: _buildNavItem(Icons.person, '마이페이지', Color(0xFFD1D1D1)),
-              )),
+                    padding: EdgeInsets.only(top: 10),
+                    child: _buildNavItem(
+                      Icons.person,
+                      '마이페이지',
+                      selectedIndex == 4
+                          ? Color(0xFFC29FF0)
+                          : Color(0xFFD1D1D1),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
-          // 가운데 아이콘 위치 조정
+          // 중앙 아이템 위치 조정
           Positioned(
-            top: -30, // 원하는 만큼 위로 올리기
-            left: screenWidth / 2 - 28, // 중앙 정렬
-            child: _buildCenterNavItem(
-              Icons.celebration,
-              '파티',
-              Color(0xFFC29FF0),
+            top: -30,
+            left: screenWidth / 2 - 28,
+            child: GestureDetector(
+              onTap: () => onItemTapped(2),
+              child: _buildCenterNavItem(
+                Icons.celebration,
+                '파티',
+                selectedIndex == 2 ? Color(0xFFC29FF0) : Color(0xFFD1D1D1),
+              ),
             ),
           ),
         ],

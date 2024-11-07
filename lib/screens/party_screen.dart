@@ -1,3 +1,4 @@
+import 'package:capstone_v1/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'custom_navigation_bar.dart'; // Import your custom navigation bar
 
@@ -24,7 +25,7 @@ class PartyScreen extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.add, color: Colors.purple),
               onPressed: () {
-                // Add your action for creating a new party
+                mainPageKey.currentState?.onItemTapped(5);
               },
             ),
           ],
@@ -53,8 +54,7 @@ class PartyScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar:
-          CustomNavigationBar(), // Custom Bottom Navigation Bar
+      // Custom Bottom Navigation Bar
     );
   }
 

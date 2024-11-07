@@ -199,7 +199,6 @@ class PartyDetailScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: CustomNavigationBar(),
     );
   }
 

@@ -1,3 +1,5 @@
+import 'package:capstone_v1/screens/friends_screen.dart';
+import 'package:capstone_v1/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'custom_navigation_bar.dart';
 
@@ -125,7 +127,7 @@ class HomeScreen extends StatelessWidget {
                           SizedBox(width: 40), // 간격 추가
                           ElevatedButton(
                             onPressed: () {
-                              print("버튼 클릭됨");
+                              mainPageKey.currentState?.onItemTapped(2);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Color(0xFFFFFBEA),
@@ -328,31 +330,36 @@ class HomeScreen extends StatelessWidget {
                           letterSpacing: -0.22,
                         ),
                       ),
-                      Container(
-                        width: 93,
-                        height: 25,
-                        decoration: BoxDecoration(
-                          color: Color(0xFFFFFBEA),
-                          borderRadius: BorderRadius.circular(30),
-                          border:
-                              Border.all(width: 1, color: Color(0xEFB46EFB)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0x0C000000),
-                              blurRadius: 3,
-                              offset: Offset(4, 4),
+                      GestureDetector(
+                        onTap: () {
+                          mainPageKey.currentState?.onItemTapped(3);
+                        },
+                        child: Container(
+                          width: 93,
+                          height: 25,
+                          decoration: BoxDecoration(
+                            color: Color(0xFFFFFBEA),
+                            borderRadius: BorderRadius.circular(30),
+                            border:
+                                Border.all(width: 1, color: Color(0xEFB46EFB)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color(0x0C000000),
+                                blurRadius: 3,
+                                offset: Offset(4, 4),
+                              ),
+                            ],
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '친구 보러가기',
+                            style: TextStyle(
+                              color: Color(0xEFB46EFB),
+                              fontSize: 12,
+                              fontFamily: 'Inter',
+                              fontWeight: FontWeight.w400,
+                              letterSpacing: -0.13,
                             ),
-                          ],
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '친구 보러가기',
-                          style: TextStyle(
-                            color: Color(0xEFB46EFB),
-                            fontSize: 12,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w400,
-                            letterSpacing: -0.13,
                           ),
                         ),
                       ),
@@ -372,7 +379,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
         ),
-        bottomNavigationBar: CustomNavigationBar(), // 하단 네비게이션 바
+        // 하단 네비게이션 바
       ),
     );
   }

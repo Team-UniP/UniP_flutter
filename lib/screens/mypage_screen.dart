@@ -260,7 +260,6 @@ class MyPageScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar: CustomNavigationBar(),
     );
   }
 

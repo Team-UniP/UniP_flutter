@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:capstone_v1/service/oauth_service.dart';
+import 'package:capstone_v1/url/uri.dart';
+import 'package:capstone_v1/screens/web_view.dart';
 
 class LoginScreen extends StatelessWidget {
+  OAuthService oAuthService = OAuthService();
+  final String naverLoginURL =
+      '${ApiInfo.mainBaseUrl}' + '${ApiInfo.naverLoginUri}';
+  final String googleLoginURL =
+      '${ApiInfo.mainBaseUrl}' + '${ApiInfo.googleLoginUri}';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,30 +38,31 @@ class LoginScreen extends StatelessWidget {
                 icon:
                     'assets/image/naver.png', // Replace with your Naver icon asset
 
-                onTap: () {
-                  // Implement Naver login action
-                },
-              ),
-              const SizedBox(height: 10),
-
-              // Kakao Login Button
-              _buildLoginButton(
-                icon:
-                    'assets/image/kakao.png', // Replace with your Kakao icon asset
-
-                onTap: () {
-                  // Implement Kakao login action
+                onTap: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          WebViewScreen(url: naverLoginURL), // WebViewScreen 호출
+                    ),
+                  );
                 },
               ),
               const SizedBox(height: 10),
 
               // Google Login Button
               _buildLoginButton(
-                icon:
-                    'assets/image/google.png', // Replace with your Google icon asset
+                icon: 'assets/image/google.png',
+                // Replace with your Google icon asset
 
-                onTap: () {
-                  // Implement Google login action
+                onTap: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => WebViewScreen(
+                          url: googleLoginURL), // WebViewScreen 호출
+                    ),
+                  );
                 },
               ),
             ],

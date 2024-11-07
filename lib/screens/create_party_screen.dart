@@ -198,8 +198,7 @@ class CreatePartyScreen extends StatelessWidget {
           ],
         ),
       ),
-      bottomNavigationBar:
-          CustomNavigationBar(), // Custom Bottom Navigation Bar
+      // Custom Bottom Navigation Bar
     );
   }
 
