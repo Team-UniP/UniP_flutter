@@ -53,14 +53,26 @@ class _WebViewScreenState extends State<WebViewScreen> {
 
   void _handleResponse(String response) {
     try {
-      // JSON 문자열 파싱
-      final Map<String, dynamic> jsonMap = json.decode(response);
-      String accessToken = jsonMap['accessToken'];
+      final decodedResponse = json.decode(response);
+      if (decodedResponse is String) {
+        final Map<String, dynamic> jsonMap = json.decode(decodedResponse);
+        String accessToken =
+            jsonMap['accessToken']?.split(" ")[1] ?? ''; // "bearer " 이후의 값만 추출
+        bool isAuthenticated = jsonMap['auth'] == "true";
 
-      // AccessToken을 SecureStorage에 저장
-      storage.write(key: 'accessToken', value: accessToken);
+        storage.write(key: 'accessToken', value: accessToken); // 순수한 토큰 값만 저장
+        Navigator.pop(context, isAuthenticated);
+      } else if (decodedResponse is Map<String, dynamic>) {
+        String accessToken = decodedResponse['accessToken']?.split(" ")[1] ??
+            ''; // "bearer " 이후의 값만 추출
+        bool isAuthenticated = decodedResponse['auth'] == "true";
+
+        storage.write(key: 'accessToken', value: accessToken); // 순수한 토큰 값만 저장
+        Navigator.pop(context, isAuthenticated);
+      }
     } catch (e) {
       print("Error parsing JSON response: $e");
+      Navigator.pop(context, false);
     }
   }
 

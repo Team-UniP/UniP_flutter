@@ -1,8 +1,10 @@
 import 'package:capstone_v1/screens/main_screen.dart';
 import 'package:flutter/material.dart';
-import 'custom_navigation_bar.dart'; // Import your custom navigation bar
+import 'package:capstone_v1/service/party_service.dart';
 
 class PartyScreen extends StatelessWidget {
+  final PartyService _partyService = PartyService();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -10,7 +12,7 @@ class PartyScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        automaticallyImplyLeading: false, // No back button
+        automaticallyImplyLeading: false,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -25,56 +27,74 @@ class PartyScreen extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.add, color: Colors.purple),
               onPressed: () {
-                mainPageKey.currentState?.onItemTapped(5);
+                mainPageKey.currentState?.onItemTapped(2);
               },
             ),
           ],
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Filter options (식사, 음주, 종합)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildFilterOption('식사', 'assets/image/foodicon.png'),
-                _buildFilterOption('음주', 'assets/image/drinkicon.png'),
-                _buildFilterOption('종합', 'assets/image/totalicon.png'),
-              ],
-            ),
-            SizedBox(height: 20),
-
-            // List of party cards
-            _buildPartyCard('assets/image/drinkfilter.png'),
-            _buildPartyCard('assets/image/drinkfilter.png'),
-            _buildPartyCard('assets/image/drinkfilter.png'),
-            _buildPartyCard('assets/image/drinkfilter.png'),
-          ],
-        ),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _partyService.fetchParties(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text('Error loading parties: ${snapshot.error}'),
+            );
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No parties available.'));
+          } else {
+            print("Loaded Parties: ${snapshot.data}");
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  // Filter options
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildFilterOption('식사', 'assets/image/foodicon.png'),
+                      _buildFilterOption('음주', 'assets/image/drinkicon.png'),
+                      _buildFilterOption('종합', 'assets/image/totalicon.png'),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  // Displaying list of party cards
+                  ...snapshot.data!
+                      .map((party) => _buildPartyCard(party))
+                      .toList(),
+                ],
+              ),
+            );
+          }
+        },
       ),
-      // Custom Bottom Navigation Bar
     );
   }
 
-  // Method to build filter options
   Widget _buildFilterOption(String label, String imagePath) {
     return Column(
       children: [
-        // Display the image directly
         Image.asset(
           imagePath,
-          width: 90, // Set width as per your requirement
-          height: 33, // Set height as per your requirement
-          fit: BoxFit.contain, // Adjust how the image is fitted inside the box
+          width: 90,
+          height: 33,
+          fit: BoxFit.contain,
         ),
       ],
     );
   }
 
-  // Method to build each party card
-  Widget _buildPartyCard(String imagePath) {
+  // Updated to properly handle data and format times
+  Widget _buildPartyCard(Map<String, dynamic> party) {
+    // 시간 형식 변경 (ISO 8601에서 가독성 높은 형식으로 변환)
+    String formatTime(String? time) {
+      if (time == null) return '';
+      DateTime dateTime = DateTime.parse(time);
+      return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')}/${dateTime.hour}시';
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Container(
@@ -97,15 +117,13 @@ class PartyScreen extends StatelessWidget {
             Column(
               children: [
                 CircleAvatar(
-                  backgroundImage:
-                      NetworkImage('https://via.placeholder.com/57'),
+                  backgroundImage: NetworkImage(
+                      'https://ssl.pstatic.net/static/pwe/address/img_profile.png'), // Placeholder or party image
                   radius: 28,
                 ),
-                SizedBox(
-                  height: 5,
-                ),
+                SizedBox(height: 5),
                 Text(
-                  '고구마',
+                  party['name'] ?? 'Unknown',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -113,99 +131,77 @@ class PartyScreen extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(
-              width: 20,
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: 15,
-                ),
-                Row(
-                  children: [
-                    Text(
-                      '오후에 두정동에서 술자리 하실분??',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 15,
-                        fontFamily: 'Inter',
-                        fontWeight: FontWeight.w600,
-                        height: 0.10,
-                        letterSpacing: -0.17,
+            SizedBox(width: 20),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 15),
+                  Text(
+                    party['title'] ?? 'No Content',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 15,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.17,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Image.asset(
+                        getPartyTypeImage(party['partyType'] ?? ''),
+                        width: 61,
+                        height: 33,
+                        fit: BoxFit.contain,
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  children: [
-                    Image.asset(
-                      imagePath,
-                      width: 61, // Set width as per your requirement
-                      height: 33, // Set height as per your requirement
-                      fit: BoxFit
-                          .contain, // Adjust how the image is fitted inside the box
-                    ),
-                    Column(
-                      children: [
-                        Text(
-                          '시작시간',
-                          style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 12,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '시작 시간: ${formatTime(party['startTime'])}',
+                            style:
+                                TextStyle(color: Colors.black54, fontSize: 12),
                           ),
-                        ),
-                        Text(
-                          '종료시간',
-                          style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 12,
+                          Text(
+                            '종료 시간: ${formatTime(party['endTime'])}',
+                            style:
+                                TextStyle(color: Colors.black54, fontSize: 12),
                           ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    Column(
-                      children: [
-                        Text(
-                          '2024.09.08/1시',
-                          style: TextStyle(
-                            color: Color(0xEFB46EFB),
-                            fontSize: 12,
-                          ),
-                        ),
-                        Text(
-                          '2024.09.09/1시',
-                          style: TextStyle(
-                            color: Color(0xEFB46EFB),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      '1/4',
-                      style: TextStyle(
-                        color: Colors.purple,
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      Spacer(),
+                      Text(
+                        '${party['peopleCount'] ?? 0}/${party['limit'] ?? 0}',
+                        style: TextStyle(
+                          color: Colors.purple,
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  // 헬퍼 함수: partyType에 따른 이미지 경로 반환
+  String getPartyTypeImage(String partyType) {
+    switch (partyType) {
+      case 'BAR':
+        return 'assets/image/drinkfilter.png';
+      case 'RESTAURANT':
+        return 'assets/image/foodfilter.png';
+      case 'COMPREHENSIVE':
+        return 'assets/image/totalfliter.png';
+      default:
+        return 'assets/image/drinkicon.png'; // 기본 아이콘 (기본 이미지 설정)
+    }
   }
 }

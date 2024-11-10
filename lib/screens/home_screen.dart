@@ -127,7 +127,7 @@ class HomeScreen extends StatelessWidget {
                           SizedBox(width: 40), // 간격 추가
                           ElevatedButton(
                             onPressed: () {
-                              mainPageKey.currentState?.onItemTapped(2);
+                              mainPageKey.currentState?.onItemTapped(5);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Color(0xFFFFFBEA),
