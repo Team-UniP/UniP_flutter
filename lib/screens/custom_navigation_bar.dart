@@ -1,8 +1,13 @@
+import 'package:capstone_v1/screens/chatlist_screen.dart';
+import 'package:capstone_v1/screens/friends_screen.dart';
+import 'package:capstone_v1/screens/home_screen.dart';
+import 'package:capstone_v1/screens/mypage_screen.dart';
+import 'package:capstone_v1/screens/party_screen.dart';
 import 'package:flutter/material.dart';
 
 class CustomNavigationBar extends StatelessWidget {
   final int selectedIndex;
-  final Function(int) onItemTapped;
+  final Function(int, Widget) onItemTapped;
 
   CustomNavigationBar({
     required this.selectedIndex,
@@ -26,7 +31,7 @@ class CustomNavigationBar extends StatelessWidget {
             children: [
               Expanded(
                 child: GestureDetector(
-                  onTap: () => onItemTapped(0),
+                  onTap: () => onItemTapped(0, HomeScreen()),
                   child: Padding(
                     padding: EdgeInsets.only(top: 10),
                     child: _buildNavItem(
@@ -41,7 +46,7 @@ class CustomNavigationBar extends StatelessWidget {
               ),
               Expanded(
                 child: GestureDetector(
-                  onTap: () => onItemTapped(1),
+                  onTap: () => onItemTapped(1, ChatlistScreen()),
                   child: Padding(
                     padding: EdgeInsets.only(top: 10),
                     child: _buildNavItem(
@@ -57,7 +62,7 @@ class CustomNavigationBar extends StatelessWidget {
               Expanded(child: SizedBox.shrink()), // 중앙 공간 확보
               Expanded(
                 child: GestureDetector(
-                  onTap: () => onItemTapped(3),
+                  onTap: () => onItemTapped(3, FriendsScreen()),
                   child: Padding(
                     padding: EdgeInsets.only(top: 10),
                     child: _buildNavItem(
@@ -72,7 +77,7 @@ class CustomNavigationBar extends StatelessWidget {
               ),
               Expanded(
                 child: GestureDetector(
-                  onTap: () => onItemTapped(4),
+                  onTap: () => onItemTapped(4, MyPageScreen()),
                   child: Padding(
                     padding: EdgeInsets.only(top: 10),
                     child: _buildNavItem(
@@ -87,12 +92,11 @@ class CustomNavigationBar extends StatelessWidget {
               ),
             ],
           ),
-          // 중앙 아이템 위치 조정
           Positioned(
             top: -30,
             left: screenWidth / 2 - 28,
             child: GestureDetector(
-              onTap: () => onItemTapped(2),
+              onTap: () => onItemTapped(2, PartyScreen()),
               child: _buildCenterNavItem(
                 Icons.celebration,
                 '파티',

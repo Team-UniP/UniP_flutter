@@ -1,3 +1,4 @@
+import 'package:capstone_v1/screens/home_screen.dart';
 import 'package:capstone_v1/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:capstone_v1/service/univ_verification.dart';
@@ -48,7 +49,7 @@ class _AccountVerificationScreenState extends State<AccountVerificationScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => MainPage(key: mainPageKey), // MainPage로 이동
+          builder: (context) => MainPage(key: MainPage.mainPageKey),
         ),
       );
     } catch (error) {

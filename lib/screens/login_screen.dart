@@ -57,7 +57,7 @@ class LoginScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) =>
-                              MainPage(key: mainPageKey), // MainPage로 이동
+                              MainPage(key: MainPage.mainPageKey),
                         ),
                       );
                     } else if (isAuthenticated == false) {
@@ -119,7 +119,6 @@ class LoginScreen extends StatelessWidget {
                           WebViewScreen(url: "google_login_url"),
                     ),
                   );
-                  _processAuthResult(context, result);
                 },
               ),
             ],
@@ -127,23 +126,6 @@ class LoginScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  void _processAuthResult(
-      BuildContext context, Map<String, dynamic>? result) async {
-    if (result != null && result['auth'] == true) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MainPage(key: mainPageKey),
-        ),
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => AccountVerificationScreen()),
-      );
-    }
   }
 
   Widget _buildLoginButton({

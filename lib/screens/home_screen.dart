@@ -1,5 +1,6 @@
 import 'package:capstone_v1/screens/friends_screen.dart';
 import 'package:capstone_v1/screens/main_screen.dart';
+import 'package:capstone_v1/screens/party_screen.dart';
 import 'package:flutter/material.dart';
 import 'custom_navigation_bar.dart';
 
@@ -127,7 +128,8 @@ class HomeScreen extends StatelessWidget {
                           SizedBox(width: 40), // 간격 추가
                           ElevatedButton(
                             onPressed: () {
-                              mainPageKey.currentState?.onItemTapped(5);
+                              MainPage.mainPageKey.currentState
+                                  ?.navigateToPage(2, PartyScreen());
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Color(0xFFFFFBEA),
@@ -148,8 +150,8 @@ class HomeScreen extends StatelessWidget {
                                   height: 41,
                                   decoration: BoxDecoration(
                                     image: DecorationImage(
-                                      image: NetworkImage(
-                                          "https://via.placeholder.com/27x43"),
+                                      image: AssetImage(
+                                          'assets/image/partyicon.png'),
                                       fit: BoxFit.contain,
                                     ),
                                   ),
@@ -287,7 +289,7 @@ class HomeScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     buildCard('내장탕', 'LV.12', '32', '94',
-                        'https://via.placeholder.com/50', '2.'),
+                        'https://via.placeholder.com/50x50', '2.'),
 
                     // 가운데 카드: Transform으로 높이를 10% 정도 높게 조정
                     Transform.translate(
@@ -298,20 +300,20 @@ class HomeScreen extends StatelessWidget {
                         children: [
                           Positioned(
                             top: 0,
-                            child: Icon(
-                              Icons.crop,
-                              color: Colors.amber,
-                              size: 36,
+                            child: Image.asset(
+                              'assets/image/crownicon.png', // Replace with your logo asset
+                              width: 30,
+                              height: 30,
                             ),
                           ),
                           buildCard('감자탕', 'LV.12', '32', '94',
-                              'https://via.placeholder.com/50', ''),
+                              'https://via.placeholder.com/50x50', ''),
                         ],
                       ),
                     ),
 
                     buildCard('수육국밥', 'LV.12', '32', '94',
-                        'https://via.placeholder.com/50', '3.'),
+                        'https://via.placeholder.com/50x50', '3.'),
                   ],
                 ),
                 Container(
@@ -332,7 +334,8 @@ class HomeScreen extends StatelessWidget {
                       ),
                       GestureDetector(
                         onTap: () {
-                          mainPageKey.currentState?.onItemTapped(3);
+                          MainPage.mainPageKey.currentState
+                              ?.navigateToPage(2, PartyScreen());
                         },
                         child: Container(
                           width: 93,

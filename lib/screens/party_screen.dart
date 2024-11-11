@@ -1,4 +1,6 @@
+import 'package:capstone_v1/screens/create_party_screen.dart';
 import 'package:capstone_v1/screens/main_screen.dart';
+import 'package:capstone_v1/screens/party_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:capstone_v1/service/party_service.dart';
 
@@ -8,7 +10,7 @@ class PartyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFEEEDEF), // Background color
+      backgroundColor: Color(0xFFEEEDEF),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -27,7 +29,8 @@ class PartyScreen extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.add, color: Colors.purple),
               onPressed: () {
-                mainPageKey.currentState?.onItemTapped(2);
+                MainPage.mainPageKey.currentState
+                    ?.navigateToPage(2, CreatePartyScreen());
               },
             ),
           ],
@@ -45,7 +48,6 @@ class PartyScreen extends StatelessWidget {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text('No parties available.'));
           } else {
-            print("Loaded Parties: ${snapshot.data}");
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -62,7 +64,7 @@ class PartyScreen extends StatelessWidget {
                   SizedBox(height: 20),
                   // Displaying list of party cards
                   ...snapshot.data!
-                      .map((party) => _buildPartyCard(party))
+                      .map((party) => _buildPartyCard(context, party))
                       .toList(),
                 ],
               ),
@@ -87,111 +89,119 @@ class PartyScreen extends StatelessWidget {
   }
 
   // Updated to properly handle data and format times
-  Widget _buildPartyCard(Map<String, dynamic> party) {
-    // 시간 형식 변경 (ISO 8601에서 가독성 높은 형식으로 변환)
+  Widget _buildPartyCard(BuildContext context, Map<String, dynamic> party) {
     String formatTime(String? time) {
       if (time == null) return '';
       DateTime dateTime = DateTime.parse(time);
       return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')}/${dateTime.hour}시';
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 10,
-              offset: Offset(4, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
-              children: [
-                CircleAvatar(
-                  backgroundImage: NetworkImage(
-                      'https://ssl.pstatic.net/static/pwe/address/img_profile.png'), // Placeholder or party image
-                  radius: 28,
-                ),
-                SizedBox(height: 5),
-                Text(
-                  party['name'] ?? 'Unknown',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(width: 20),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    final partyId = party['partyId']; // Get the party ID'
+    final name = party['name'];
+
+    return GestureDetector(
+      onTap: () {
+        // Navigate to the detail screen with partyId
+        MainPage.mainPageKey.currentState?.navigateToPage(
+            2, PartyDetailScreen(partyId: partyId, name: name));
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 10,
+                offset: Offset(4, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
                 children: [
-                  SizedBox(height: 15),
-                  Text(
-                    party['title'] ?? 'No Content',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 15,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -0.17,
-                    ),
+                  CircleAvatar(
+                    backgroundImage: NetworkImage(
+                        'https://ssl.pstatic.net/static/pwe/address/img_profile.png'),
+                    radius: 28,
                   ),
-                  SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Image.asset(
-                        getPartyTypeImage(party['partyType'] ?? ''),
-                        width: 61,
-                        height: 33,
-                        fit: BoxFit.contain,
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '시작 시간: ${formatTime(party['startTime'])}',
-                            style:
-                                TextStyle(color: Colors.black54, fontSize: 12),
-                          ),
-                          Text(
-                            '종료 시간: ${formatTime(party['endTime'])}',
-                            style:
-                                TextStyle(color: Colors.black54, fontSize: 12),
-                          ),
-                        ],
-                      ),
-                      Spacer(),
-                      Text(
-                        '${party['peopleCount'] ?? 0}/${party['limit'] ?? 0}',
-                        style: TextStyle(
-                          color: Colors.purple,
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
+                  SizedBox(height: 5),
+                  Text(
+                    party['name'] ?? 'Unknown',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
-            ),
-          ],
+              SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 15),
+                    Text(
+                      party['title'] ?? 'No Content',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 15,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: -0.17,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Image.asset(
+                          getPartyTypeImage(party['partyType'] ?? ''),
+                          width: 61,
+                          height: 33,
+                          fit: BoxFit.contain,
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '시작 시간: ${formatTime(party['startTime'])}',
+                              style: TextStyle(
+                                  color: Colors.black54, fontSize: 12),
+                            ),
+                            Text(
+                              '종료 시간: ${formatTime(party['endTime'])}',
+                              style: TextStyle(
+                                  color: Colors.black54, fontSize: 12),
+                            ),
+                          ],
+                        ),
+                        Spacer(),
+                        Text(
+                          '${party['peopleCount'] ?? 0}/${party['limit'] ?? 0}',
+                          style: TextStyle(
+                            color: Colors.purple,
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // 헬퍼 함수: partyType에 따른 이미지 경로 반환
   String getPartyTypeImage(String partyType) {
     switch (partyType) {
       case 'BAR':
@@ -201,7 +211,7 @@ class PartyScreen extends StatelessWidget {
       case 'COMPREHENSIVE':
         return 'assets/image/totalfliter.png';
       default:
-        return 'assets/image/drinkicon.png'; // 기본 아이콘 (기본 이미지 설정)
+        return 'assets/image/drinkicon.png';
     }
   }
 }
