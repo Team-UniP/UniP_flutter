@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:kakao_map_plugin/kakao_map_plugin.dart';
+import 'package:capstone_v1/service/kakao_map_service.dart';
 import 'package:intl/intl.dart';
 import 'package:capstone_v1/service/party_service.dart';
 
@@ -8,12 +10,17 @@ class PartyDetailScreen extends StatefulWidget {
   final PartyService _partyService = PartyService();
 
   PartyDetailScreen({required this.partyId, required this.name});
+
+  @override
   _PartyDetailScreenState createState() => _PartyDetailScreenState();
 }
 
 class _PartyDetailScreenState extends State<PartyDetailScreen> {
   int _selectedRouteIndex = 0;
   late Future<Map<String, dynamic>> _partyDetailFuture;
+  final KakaoMapService _kakaoMapService = KakaoMapService();
+  KakaoMapController? _mapController;
+  Set<Marker> _markers = {};
 
   @override
   void initState() {
@@ -21,14 +28,18 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
     _partyDetailFuture = widget._partyService.fetchPartyDetail(widget.partyId);
   }
 
-  // 시간 형식을 가독성 있게 변환하는 함수
-  String formatDateTime(String dateTime) {
-    try {
-      final DateTime parsedDate = DateTime.parse(dateTime);
-      return DateFormat('yyyy-MM-dd HH:mm').format(parsedDate);
-    } catch (e) {
-      return dateTime;
-    }
+  /// 주소를 이용해 마커를 생성하고 지도에 반영
+  Future<void> _loadMarkers(String address) async {
+    if (_mapController == null) return;
+
+    final markers = await _kakaoMapService.getMarkersFromAddress(
+      _mapController!,
+      address,
+    );
+
+    setState(() {
+      _markers = markers;
+    });
   }
 
   @override
@@ -51,6 +62,7 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
             final currentCourse = courses.isNotEmpty
                 ? courses[_selectedRouteIndex]
                 : {'name': '루트 없음', 'content': '내용 없음', 'address': '주소 없음'};
+            final currentAddress = currentCourse['address'] ?? '';
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(14.0),
@@ -68,75 +80,14 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
                   ),
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 15, vertical: 15),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 10,
-                          offset: Offset(4, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Column(
-                          children: [
-                            CircleAvatar(
-                              backgroundImage: NetworkImage(
-                                  'https://via.placeholder.com/40'),
-                              radius: 28,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              widget.name,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              border:
-                                  Border.all(color: Colors.black12, width: 1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Center(
-                              child: Text(
-                                details['content'] ?? 'No Content',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
                     height: 300,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      image: DecorationImage(
-                        image:
-                            NetworkImage("https://via.placeholder.com/600x300"),
-                        fit: BoxFit.cover,
-                      ),
+                    child: KakaoMap(
+                      center: LatLng(37.5665, 126.9780), // 기본 중심 좌표 (서울)
+                      onMapCreated: (controller) {
+                        _mapController = controller;
+                        _loadMarkers(currentAddress); // 지도 생성 후 마커 로드
+                      },
+                      markers: _markers.toList(),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -150,6 +101,8 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
                             setState(() {
                               _selectedRouteIndex = index;
                             });
+                            final newAddress = courses[index]['address'] ?? '';
+                            _loadMarkers(newAddress); // 새 주소로 마커 업데이트
                           },
                           child: _buildRouteTab(
                               '루트 ${index + 1}', _selectedRouteIndex == index),
@@ -161,7 +114,6 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
                     duration: Duration(milliseconds: 300),
                     child: Container(
                       key: ValueKey(_selectedRouteIndex),
-                      width: double.infinity,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 15, vertical: 15),
                       decoration: BoxDecoration(
@@ -175,60 +127,31 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
                           ),
                         ],
                       ),
-                      child: Center(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              currentCourse['name'] ?? '루트 이름 없음',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            currentCourse['name'] ?? '루트 이름 없음',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
                             ),
-                            const SizedBox(height: 5),
-                            Text(
-                              currentCourse['content'] ?? '내용 없음',
-                              style: TextStyle(
-                                fontSize: 13,
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            Text(
-                              currentCourse['address'] ?? '주소 없음',
-                              style: TextStyle(
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            currentCourse['content'] ?? '내용 없음',
+                            style: TextStyle(fontSize: 13),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            currentAddress,
+                            style: TextStyle(fontSize: 13),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                   const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Join action
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFFFFBEA),
-                        shape: StadiumBorder(),
-                        padding: EdgeInsets.symmetric(vertical: 15),
-                        shadowColor: Colors.black12,
-                        elevation: 3,
-                      ),
-                      child: Text(
-                        '파티 참가하기',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             );
