@@ -3,7 +3,7 @@ import 'package:capstone_v1/screens/home_screen.dart';
 import 'package:capstone_v1/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:capstone_v1/service/oauth_service.dart';
-import 'package:capstone_v1/url/uri.dart';
+import 'package:capstone_v1/url/api_uri.dart';
 import 'package:capstone_v1/screens/web_view.dart';
 
 class LoginScreen extends StatelessWidget {
