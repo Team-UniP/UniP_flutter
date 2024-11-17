@@ -1,5 +1,3 @@
-import 'package:uuid/uuid.dart';
-
 class ChatRoom {
   final String id;
   final String title;
