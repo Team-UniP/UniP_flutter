@@ -1,7 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'dart:convert'; // for utf8 encoding
-import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // 토큰 저장 라이브러리
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class WebViewScreen extends StatefulWidget {
   final String url;
@@ -14,12 +15,34 @@ class WebViewScreen extends StatefulWidget {
 
 class _WebViewScreenState extends State<WebViewScreen> {
   final FlutterSecureStorage storage = FlutterSecureStorage();
-  late WebViewController _controller;
+  late final WebViewController _controller;
 
   @override
   void initState() {
     super.initState();
-    WebView.platform = SurfaceAndroidWebView(); // Android에서 SurfaceWebView 사용
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageFinished: (url) async {
+            // 페이지 로드 후 데이터를 처리
+            try {
+              final String jsonResponse = await _controller
+                      .runJavaScriptReturningResult("document.body.innerText")
+                  as String;
+              _handleResponse(jsonResponse);
+
+              // 쿠키 처리
+              final String cookies = await _controller
+                  .runJavaScriptReturningResult("document.cookie") as String;
+              _handleCookies(cookies);
+            } catch (e) {
+              print("Error: $e");
+            }
+          },
+        ),
+      )
+      ..loadRequest(Uri.parse(widget.url));
   }
 
   @override
@@ -28,26 +51,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
       appBar: AppBar(
         title: Text("Web View"),
       ),
-      body: WebView(
-        initialUrl: widget.url,
-        javascriptMode: JavascriptMode.unrestricted,
-        onWebViewCreated: (WebViewController webViewController) {
-          _controller = webViewController;
-        },
-        onPageFinished: (String url) async {
-          // 페이지가 로드된 후 처리할 코드
-          String? jsonResponse =
-              await _controller.evaluateJavascript("document.body.innerText");
-          if (jsonResponse != null) {
-            _handleResponse(jsonResponse);
-          }
-
-          // 쿠키를 가져오는 방법
-          String cookies =
-              await _controller.evaluateJavascript("document.cookie;");
-          _handleCookies(cookies);
-        },
-      ),
+      body: WebViewWidget(controller: _controller),
     );
   }
 
@@ -82,7 +86,6 @@ class _WebViewScreenState extends State<WebViewScreen> {
     for (var cookie in cookieList) {
       if (cookie.startsWith('refreshToken=')) {
         String refreshToken = cookie.split('=')[1];
-        // RefreshToken을 SecureStorage에 저장
         await storage.write(key: 'refreshToken', value: refreshToken);
         break;
       }

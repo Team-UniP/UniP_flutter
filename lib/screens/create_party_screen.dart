@@ -279,7 +279,40 @@ class _CreatePartyScreenState extends State<CreatePartyScreen> {
           const SizedBox(height: 10),
           _buildFormRow('이름', _routeControllers[index]['name']!, 1, false),
           const SizedBox(height: 10),
-          _buildFormRow('주소', _routeControllers[index]['address']!, 1, false),
+          Row(
+            children: [
+              Expanded(
+                child: _buildFormRow(
+                  '주소',
+                  _routeControllers[index]['address']!,
+                  1,
+                  false,
+                ),
+              ),
+              const SizedBox(width: 10),
+              GestureDetector(
+                onTap: () {
+                  // 주소 검색 로직
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Color(0xEF8D1CFF), width: 1),
+                    borderRadius: BorderRadius.circular(40),
+                    color: Colors.white,
+                  ),
+                  child: Text(
+                    '주소 찾기',
+                    style: TextStyle(
+                      color: Color(0xEF8D1CFF),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 10),
           _buildFormRow('내용', _routeControllers[index]['content']!, 1, false),
         ],
