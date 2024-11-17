@@ -1,7 +1,12 @@
+import 'package:capstone_v1/dto/chat_room.dart';
 import 'package:capstone_v1/screens/custom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatelessWidget {
+  final ChatRoom chatRoom;
+
+  ChatScreen({required this.chatRoom});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

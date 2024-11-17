@@ -1,4 +1,4 @@
-import 'package:capstone_v1/url/uri.dart';
+import 'package:capstone_v1/url/api_uri.dart';
 import 'package:http/http.dart' as http;
 
 class OAuthService {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'dart:convert'; // for utf8 encoding
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // 토큰 저장 라이브러리
+import 'package:uri/uri.dart'; // URL 파라미터 파싱을 위한 패키지 (pubspec.yaml에 추가 필요)
 
 class WebViewScreen extends StatefulWidget {
   final String url;
@@ -36,16 +37,21 @@ class _WebViewScreenState extends State<WebViewScreen> {
         },
         onPageFinished: (String url) async {
           // 페이지가 로드된 후 처리할 코드
-          String? jsonResponse =
-              await _controller.evaluateJavascript("document.body.innerText");
-          if (jsonResponse != null) {
-            _handleResponse(jsonResponse);
+          Uri uri=Uri.parse(url);
+          if(uri.queryParameters.containsKey("code")) {
+            String? jsonResponse = await _controller.evaluateJavascript("document.body.innerText");
+            if (jsonResponse != null) {
+              _handleResponse(jsonResponse);
+            }
+
+
+            // 쿠키를 가져오는 방법
+            String cookies =
+            await _controller.evaluateJavascript("document.cookie;");
+            _handleCookies(cookies);
           }
 
-          // 쿠키를 가져오는 방법
-          String cookies =
-              await _controller.evaluateJavascript("document.cookie;");
-          _handleCookies(cookies);
+
         },
       ),
     );
