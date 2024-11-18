@@ -1,11 +1,76 @@
-import 'package:capstone_v1/dto/chat_room.dart';
-import 'package:capstone_v1/screens/custom_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:capstone_v1/dto/chat_log.dart';
+import 'package:capstone_v1/dto/chat_room.dart';
+import 'package:capstone_v1/service/chat_service.dart';
 
-class ChatScreen extends StatelessWidget {
-  final ChatRoom chatRoom;
+class ChatScreen extends StatefulWidget {
+  final ChatRoom chatRoom; // ChatRoom 필드
 
   ChatScreen({required this.chatRoom});
+
+  @override
+  _ChatScreenState createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
+  List<ChatLog> messages = [];  // 메시지 리스트
+  ChatApi chatApi = ChatApi();
+  int page = 0; // 페이지 번호
+  bool isLoading = false; // 로딩 상태 체크
+
+  // 메시지 가져오기
+  Future<void> fetchMessages() async {
+    if (isLoading) return; // 로딩 중에는 중복 호출 방지
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      String roomId = widget.chatRoom.id;
+      // API에서 ChatLog 객체 리스트 가져오기
+      List<ChatLog> fetchedMessages = await chatApi.getChatLogs(roomId, page);
+
+      // 상태 업데이트
+      setState(() {
+        messages.addAll(fetchedMessages);  // 새로운 메시지를 앞쪽에 추가
+        page++; // 페이지 번호 증가
+      });
+    } catch (error) {
+      print("API 호출 중 오류 발생: $error");
+    } finally {
+      setState(() {
+        isLoading = false; // 로딩 종료
+      });
+    }
+  }
+
+  // 스크롤이 최상단에 도달했을 때 호출되는 메서드
+  void _onScroll() {
+    // ListView의 스크롤 위치가 최상단에 도달하면 더 많은 메시지를 로드
+    if (isLoading) return;  // 로딩 중이면 추가 API 호출 방지
+
+    final scrollPosition = _scrollController.position;
+    if (scrollPosition.atEdge && scrollPosition.pixels == 0) {
+      // 최상단에 도달했을 때 API 호출
+      fetchMessages();
+    }
+  }
+
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    fetchMessages();
+    _scrollController.addListener(_onScroll); // 스크롤 이벤트 리스너 추가
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll); // 리스너 제거
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +88,7 @@ class ChatScreen extends StatelessWidget {
               child: IconButton(
                 icon: Icon(Icons.menu, color: Colors.purple, size: 30),
                 onPressed: () {
-                  // Menu action
+                  // 메뉴 액션
                 },
               ),
             ),
@@ -37,20 +102,17 @@ class ChatScreen extends StatelessWidget {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                '오후에 술자리 하실분??',
+                widget.chatRoom.title, // chatRoom의 제목 필드 사용
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                 ),
-                textAlign: TextAlign
-                    .left, // Ensures left alignment within the container
+                textAlign: TextAlign.left, // 좌측 정렬
               ),
             ),
           ),
-          // Add a SizedBox to push down the chat container
           SizedBox(height: 20),
-          // Adjust the height as needed
           Expanded(
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 14.0),
@@ -66,14 +128,18 @@ class ChatScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              child: ListView(
-                children: [
-                  _buildMessageRow("고구마", "안녕하세요! 같이 할 분?", true),
-                  _buildMessageRow("고구마", "어디서 만날까요?", true),
-                  _buildMessageRow("고구마", "두정동에서 뵙죠!", false),
-                  _buildMessageRow("고구마", "7시 어때요?", true),
-                  _buildMessageRow("고구마", "좋아요!", false),
-                ],
+              child: ListView.builder(
+                controller: _scrollController, // 스크롤 컨트롤러 연결
+                reverse: true, // 리스트 역순으로 표시
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  return _buildMessageRow(
+                      messages[index].sender,
+                      messages[index].content,
+                      messages[index].senderImage,
+                      messages[index].isLeft
+                  );
+                },
               ),
             ),
           ),
@@ -100,7 +166,7 @@ class ChatScreen extends StatelessWidget {
                 SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () {
-                    // Send action
+                    // 메시지 전송 액션
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFC29FF0),
@@ -127,14 +193,15 @@ class ChatScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMessageRow(String name, String message, bool isLeftAligned) {
+  // 메시지 행을 생성하는 메서드
+  Widget _buildMessageRow(String name, String message, String profileImage, bool isLeftAligned) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Row(
         mainAxisAlignment:
-            isLeftAligned ? MainAxisAlignment.start : MainAxisAlignment.end,
+        isLeftAligned ? MainAxisAlignment.start : MainAxisAlignment.end,
         children: [
-          if (isLeftAligned) _buildProfileIcon(name),
+          if (isLeftAligned) _buildProfileIcon(name, profileImage),
           Container(
             padding: EdgeInsets.all(10),
             constraints: BoxConstraints(maxWidth: 200),
@@ -151,17 +218,18 @@ class ChatScreen extends StatelessWidget {
               ),
             ),
           ),
-          if (!isLeftAligned) _buildProfileIcon(name),
+          if (!isLeftAligned) _buildProfileIcon(name, profileImage),
         ],
       ),
     );
   }
 
-  Widget _buildProfileIcon(String name) {
+  // 프로필 아이콘을 생성하는 메서드
+  Widget _buildProfileIcon(String name, String profileImage) {
     return Column(
       children: [
         CircleAvatar(
-          backgroundImage: NetworkImage('https://via.placeholder.com/40'),
+          backgroundImage: NetworkImage(profileImage),
           radius: 20,
         ),
         SizedBox(height: 5),

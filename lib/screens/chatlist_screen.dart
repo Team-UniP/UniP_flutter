@@ -108,6 +108,7 @@ class _ChatlistScreenState extends State<ChatlistScreen> {
   Widget _buildPartyCard(ChatRoom chatRoom) {
     return GestureDetector(
       onTap: () {
+        print("방 id:${chatRoom.id}");
         // 카드 클릭 시 채팅방 UI로 이동
         Navigator.push(
           context,
