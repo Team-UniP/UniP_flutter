@@ -8,7 +8,8 @@ import 'package:capstone_v1/url/image_url.dart';
 
 class ChatApi {
   static const String getChatURL = '${ApiInfo.chatBaseUrl}${ApiInfo.chatRooms}';
-  static const String getChatLogURL='${ApiInfo.chatBaseUrl}${ApiInfo.chatlogs}';
+  static const String getChatLogURL = '${ApiInfo.chatBaseUrl}${ApiInfo.chatLogs}';
+  static const String sendChatMessage='${ApiInfo.chatBaseUrl}${ApiInfo.sendChat}';
 
   final FlutterSecureStorage _storage = FlutterSecureStorage();
 
@@ -50,7 +51,8 @@ class ChatApi {
   }
 
   //특정 채팅방의 채팅 로그를 조회하는 메소드
-  Future<List<ChatLog>> getChatLogs(String roomId,int page) async {
+  Future<List<ChatLog>> getChatLogs(String roomId, int page) async {
+    print("page=$page");
     try {
       final accessToken = await _storage.read(key: 'accessToken');
       if (accessToken == null) {
@@ -87,6 +89,33 @@ class ChatApi {
     }
   }
 
+  Future<bool> sendMessage(String message, String roomId) async {
+    try {
+      final accessToken = await _storage.read(key: 'accessToken');
+      if (accessToken == null) {
+        throw Exception("Access token not found.");
+      }
 
+      final response = await http.post(
+        Uri.parse('$sendChatMessage/$roomId'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(message), // JSON으로 인코딩된 요청 본문
+      );
 
+      if (response.statusCode == 200) {
+        print("SUCCESS ON SENDING CHAT");
+        return true;
+      } else {
+        print("Failed to SEND CHAT: ${response.statusCode}");
+        print("Response Body: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      print("Error creating party: $e");
+      return false;
+    }
+  }
 }
