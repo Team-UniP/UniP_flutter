@@ -33,11 +33,13 @@ class KakaoMapService {
 
             // 마커 생성 및 추가
             markers.add(Marker(
-              markerId: item.id ?? UniqueKey().toString(),
-              latLng: latLng,
-              infoWindowContent: '<div>${item.addressName}</div>',
-              infoWindowFirstShow: true,
-            ));
+                markerId: item.id ?? UniqueKey().toString(),
+                width: 30,
+                height: 40,
+                latLng: latLng,
+                infoWindowFirstShow: true,
+                markerImageSrc:
+                    'https://cdn4.iconfinder.com/data/icons/e-commerce-404/512/location-1024.png'));
 
             // 마커 생성 로그
             debugPrint(

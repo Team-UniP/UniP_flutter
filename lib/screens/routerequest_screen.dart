@@ -1,7 +1,11 @@
-import 'package:capstone_v1/screens/custom_navigation_bar.dart';
+import 'package:capstone_v1/screens/main_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:capstone_v1/screens/route_screen.dart';
+import 'package:capstone_v1/service/party_service.dart';
 
 class RouteRequestScreen extends StatelessWidget {
+  final TextEditingController _promptController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,7 +28,6 @@ class RouteRequestScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Search hint
             Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(vertical: 7, horizontal: 12),
@@ -43,8 +46,6 @@ class RouteRequestScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-
-            // White container for route recommendations or map
             Container(
               width: double.infinity,
               height: 518,
@@ -53,11 +54,14 @@ class RouteRequestScreen extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
               ),
-              // Content for route recommendation/map goes here
+              child: Center(
+                child: Text(
+                  '결과는 요청 후 표시됩니다.',
+                  style: TextStyle(color: Colors.grey, fontSize: 16),
+                ),
+              ),
             ),
             const SizedBox(height: 10),
-
-            // Input field container
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -66,6 +70,7 @@ class RouteRequestScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: TextField(
+                controller: _promptController,
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   hintText: '내용 입력',
@@ -73,12 +78,28 @@ class RouteRequestScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-
-            // Request button
             Center(
               child: ElevatedButton(
-                onPressed: () {
-                  // Handle request action
+                onPressed: () async {
+                  final prompt = _promptController.text;
+
+                  // 요청 수행
+                  final responseData = await PartyService().GptRequest(prompt);
+
+                  if (responseData != null) {
+                    // 결과 화면으로 이동
+
+                    MainPage.mainPageKey.currentState?.navigateToPage(
+                      2,
+                      RouteRecommendationScreen(
+                        routeData: responseData,
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('요청 실패. 다시 시도해주세요.')),
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFFDFBFFF),

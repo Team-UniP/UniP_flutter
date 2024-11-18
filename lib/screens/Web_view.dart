@@ -28,8 +28,8 @@ class _WebViewScreenState extends State<WebViewScreen> {
             // 페이지 로드 후 데이터를 처리
             try {
               final String jsonResponse = await _controller
-                  .runJavaScriptReturningResult("document.body.innerText")
-              as String;
+                      .runJavaScriptReturningResult("document.body.innerText")
+                  as String;
               _handleResponse(jsonResponse);
 
               // 쿠키 처리

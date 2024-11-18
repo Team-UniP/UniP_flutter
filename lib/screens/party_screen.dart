@@ -1,6 +1,7 @@
 import 'package:capstone_v1/screens/create_party_screen.dart';
 import 'package:capstone_v1/screens/main_screen.dart';
 import 'package:capstone_v1/screens/party_detail_screen.dart';
+import 'package:capstone_v1/screens/routerequest_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:capstone_v1/service/party_service.dart';
 
@@ -25,6 +26,27 @@ class PartyScreen extends StatelessWidget {
                 fontSize: 22,
                 fontWeight: FontWeight.w600,
               ),
+            ),
+            SizedBox(
+              width: 180,
+            ),
+            IconButton(
+              icon: CircleAvatar(
+                backgroundColor: Colors.purple,
+                child: Text(
+                  'A.I',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+              onPressed: () {
+                // A.I 버튼 클릭 시 동작
+                MainPage.mainPageKey.currentState
+                    ?.navigateToPage(2, RouteRequestScreen());
+              },
             ),
             IconButton(
               icon: Icon(Icons.add, color: Colors.purple),
@@ -211,7 +233,7 @@ class PartyScreen extends StatelessWidget {
       case 'COMPREHENSIVE':
         return 'assets/image/totalfliter.png';
       default:
-        return 'assets/image/drinkicon.png';
+        return 'assets/image/drinkfilter.png';
     }
   }
 }

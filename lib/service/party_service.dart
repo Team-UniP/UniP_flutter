@@ -99,4 +99,76 @@ class PartyService {
       return {}; // 빈 맵을 반환하여 오류 처리
     }
   }
+
+  Future<Map<String, dynamic>?> GptRequest(String prompt) async {
+    try {
+      final accessToken = await _storage.read(key: 'accessToken');
+      if (accessToken == null) {
+        throw Exception("Access token not found.");
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/party/gpt'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({"prompt": prompt}), // JSON으로 인코딩된 요청 본문
+      );
+
+      if (response.statusCode == 200) {
+        print("GPT route creation successful!");
+
+        // JSON 파싱
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+        // 데이터 확인
+        if (responseData["code"] == 200 && responseData["data"] != null) {
+          final utf8Body = utf8.decode(response.bodyBytes);
+          final responseData = jsonDecode(utf8Body);
+          return responseData["data"];
+        } else {
+          print("Unexpected response format: ${response.body}");
+          return null;
+        }
+      } else {
+        print("Failed to create GPT route: ${response.statusCode}");
+        print("Response Body: ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      print("Error creating GPT route: $e");
+      return null;
+    }
+  }
+
+  Future<bool> JoinParty(int partyId) async {
+    try {
+      final accessToken = await _storage.read(key: 'accessToken');
+      if (accessToken == null) {
+        throw Exception("Access token not found.");
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/pm/$partyId'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        // JSON으로 인코딩된 요청 본문
+      );
+
+      if (response.statusCode == 200) {
+        print("Party join successfully!");
+        return true;
+      } else {
+        print("Failed to join party: ${response.statusCode}");
+        print("Response Body: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      print("Error join party: $e");
+      return false;
+    }
+  }
 }

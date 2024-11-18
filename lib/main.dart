@@ -8,9 +8,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
 
-  print('Loaded Kakao API Key: ${dotenv.env['KAKAO_API_KEY']}');
+  print('Loaded Kakao API Key: ${dotenv.env['APP_KEY']}');
 
-  AuthRepository.initialize(appKey: dotenv.env['KAKAO_API_KEY']!);
+  AuthRepository.initialize(
+      appKey: dotenv.env['APP_KEY'] ?? '',
+      baseUrl: dotenv.env['BASE_URL'] ?? '');
   runApp(MyApp());
 }
 

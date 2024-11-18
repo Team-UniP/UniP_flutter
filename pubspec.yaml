@@ -65,6 +65,9 @@ flutter:
   assets:
     - assets/image/
     - .env
+<<<<<<< Updated upstream
+    
+>>>>>>> Stashed changes
 
   # To add assets to your application, add an assets section, like this:
   # assets:
