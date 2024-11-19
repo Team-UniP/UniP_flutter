@@ -1,5 +1,6 @@
 import 'package:capstone_v1/screens/main_screen.dart';
 import 'package:capstone_v1/screens/party_screen.dart';
+import 'package:capstone_v1/service/chat_service.dart';
 import 'package:capstone_v1/service/party_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -19,7 +20,7 @@ class _RouteRecommendationScreenState extends State<RouteRecommendationScreen> {
   final TextEditingController _startDateController = TextEditingController();
   final TextEditingController _endDateController = TextEditingController();
   final TextEditingController _peopleController = TextEditingController();
-
+  final ChatApi chatApi=ChatApi();
   String? _formattedStartDate;
   String? _formattedEndDate;
 
@@ -74,14 +75,17 @@ class _RouteRecommendationScreenState extends State<RouteRecommendationScreen> {
       };
 
       print("전송할 데이터: $partyData");
-      await _partyService.createParty(partyData);
+      int partyId = await _partyService.createParty(partyData);
 
-      // 여기에 실제 서버 요청 로직 추가 (예: http.post 등)
-      // 성공 시 알림 표시
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('파티가 성공적으로 생성되었습니다!')),
-      );
-      MainPage.mainPageKey.currentState?.navigateToPage(2, PartyScreen());
+      if(partyId<0) {
+        var bool = await chatApi.makeChatRoom(widget.routeData['title'], partyId);
+        if(bool){
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('파티가 성공적으로 생성되었습니다!')),
+          );
+          MainPage.mainPageKey.currentState?.navigateToPage(2, PartyScreen());
+        }
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('파티 생성에 실패했습니다. 다시 시도해주세요.')),

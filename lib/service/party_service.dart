@@ -39,7 +39,7 @@ class PartyService {
     }
   }
 
-  Future<bool> createParty(Map<String, dynamic> partyData) async {
+  Future<int> createParty(Map<String, dynamic> partyData) async {
     try {
       final accessToken = await _storage.read(key: 'accessToken');
       if (accessToken == null) {
@@ -55,17 +55,22 @@ class PartyService {
         body: jsonEncode(partyData), // JSON으로 인코딩된 요청 본문
       );
 
+      final decodedBody = utf8.decode(response.bodyBytes);
       if (response.statusCode == 200) {
-        print("Party created successfully!");
-        return true;
+        final data = jsonDecode(decodedBody);
+        if (data is Map<String, dynamic> && data.containsKey('data')) {
+          // 서버에서 'data' 필드에 숫자가 포함되어 있다고 가정
+          return data['data'] as int;
+        } else {
+          throw Exception(
+              "Unexpected API response format: 'data' field missing or not a number");
+        }
       } else {
-        print("Failed to create party: ${response.statusCode}");
-        print("Response Body: ${response.body}");
-        return false;
+        throw Exception("Failed to create party: ${response.statusCode}");
       }
     } catch (e) {
       print("Error creating party: $e");
-      return false;
+      return -1; // 오류 시 음수를 반환하여 실패를 나타냄
     }
   }
 

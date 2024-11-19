@@ -10,6 +10,7 @@ class ChatApi {
   static const String getChatURL = '${ApiInfo.chatBaseUrl}${ApiInfo.chatRooms}';
   static const String getChatLogURL = '${ApiInfo.chatBaseUrl}${ApiInfo.chatLogs}';
   static const String sendChatMessage='${ApiInfo.chatBaseUrl}${ApiInfo.sendChat}';
+  static const String participateInChatRoom="${ApiInfo.chatBaseUrl}${ApiInfo.participateChatRoom}";
 
   final FlutterSecureStorage _storage = FlutterSecureStorage();
 
@@ -115,6 +116,73 @@ class ChatApi {
       }
     } catch (e) {
       print("Error creating party: $e");
+      return false;
+    }
+  }
+
+  Future<bool> makeChatRoom(String title,int partyId) async {
+    try {
+      final accessToken = await _storage.read(key: 'accessToken');
+      if (accessToken == null) {
+        throw Exception("Access token not found.");
+      }
+
+      final Map<String, dynamic> message = {
+        "partyDto": {
+          "title": title,
+          "partyId": partyId,
+        },
+      };
+
+      final response = await http.post(
+        Uri.parse('$getChatURL'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(message), // JSON으로 인코딩된 요청 본문
+      );
+
+      if (response.statusCode == 200) {
+        print("SUCCESS ON SENDING CHAT");
+        return true;
+      } else {
+        print("Failed to SEND CHAT: ${response.statusCode}");
+        print("Response Body: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      print("Error creating party: $e");
+      return false;
+    }
+  }
+
+  Future<bool> participateChatRoom(int partyId) async {
+    try {
+      final accessToken = await _storage.read(key: 'accessToken');
+      if (accessToken == null) {
+        throw Exception("Access token not found.");
+      }
+
+
+      final response = await http.post(
+        Uri.parse('$participateInChatRoom/$partyId'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print("SUCCESS ON Participating CHAT");
+        return true;
+      } else {
+        print("Failed to Participate CHAT: ${response.statusCode}");
+        print("Response Body: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      print("Error participating chat: $e");
       return false;
     }
   }

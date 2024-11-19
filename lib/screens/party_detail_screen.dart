@@ -1,5 +1,6 @@
 import 'package:capstone_v1/screens/main_screen.dart';
 import 'package:capstone_v1/screens/party_screen.dart';
+import 'package:capstone_v1/service/chat_service.dart';
 import 'package:flutter/material.dart';
 import 'package:kakao_map_plugin/kakao_map_plugin.dart';
 import 'package:capstone_v1/service/kakao_map_service.dart';
@@ -9,6 +10,7 @@ class PartyDetailScreen extends StatefulWidget {
   final int partyId;
   final String name;
   final PartyService _partyService = PartyService();
+
 
   PartyDetailScreen({required this.partyId, required this.name});
 
@@ -22,6 +24,7 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
   final KakaoMapService _kakaoMapService = KakaoMapService();
   KakaoMapController? _mapController;
   Set<Marker> _markers = {};
+  ChatApi chatApi=ChatApi();
 
   @override
   void initState() {
@@ -241,6 +244,14 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
 
                           if (responseData) {
                             // 결과 화면으로 이동
+                            var bool = await chatApi.participateChatRoom(widget.partyId);
+                            if(bool){
+                              MainPage.mainPageKey.currentState?.navigateToPage(
+                                2,
+                                PartyScreen(),
+                              );
+                            }
+
                             MainPage.mainPageKey.currentState?.navigateToPage(
                               2,
                               PartyScreen(),
