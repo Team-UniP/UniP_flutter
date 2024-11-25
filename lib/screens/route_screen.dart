@@ -77,7 +77,7 @@ class _RouteRecommendationScreenState extends State<RouteRecommendationScreen> {
       print("전송할 데이터: $partyData");
       int partyId = await _partyService.createParty(partyData);
 
-      if(partyId<0) {
+      if(partyId>0) {
         var bool = await chatApi.makeChatRoom(widget.routeData['title'], partyId);
         if(bool){
           ScaffoldMessenger.of(context).showSnackBar(
