@@ -171,4 +171,70 @@ class PartyService {
       return false;
     }
   }
+
+  Future<List<int>> fetchMyPartyIds() async {
+    try {
+      final accessToken = await _storage.read(key: 'accessToken');
+      if (accessToken == null) {
+        throw Exception("Access token not found.");
+      }
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/party/my'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      final decodedBody = utf8.decode(response.bodyBytes);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(decodedBody);
+        if (data is Map<String, dynamic> && data.containsKey('data')) {
+          // 데이터에서 id만 추출하여 반환
+          final List<dynamic> myParties = data['data'];
+          return myParties.map<int>((party) => party['id'] as int).toList();
+        } else {
+          throw Exception(
+              "Unexpected API response format: 'data' field missing or not a List");
+        }
+      } else {
+        throw Exception("Failed to load my parties: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error fetching my parties: $e");
+      return []; // 빈 리스트 반환
+    }
+  }
+
+  Future<bool> inviteFriendToParty(int partyId, int friendId) async {
+    try {
+      final accessToken = await _storage.read(key: 'accessToken');
+      if (accessToken == null) {
+        throw Exception("Access token not found.");
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/alarm/invitation'),
+        headers: {
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'party': partyId,
+          'receiver': friendId,
+        }),
+      );
+      print("friendId is $friendId");
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        print("Failed to invite friend: ${response.statusCode}");
+        return false;
+      }
+    } catch (e) {
+      print("Error inviting friend: $e");
+      return false;
+    }
+  }
 }

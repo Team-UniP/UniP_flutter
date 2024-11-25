@@ -5,6 +5,7 @@ import 'party_screen.dart';
 import 'friends_screen.dart';
 import 'mypage_screen.dart';
 import 'custom_navigation_bar.dart';
+import 'notification_screen.dart';
 
 class MainPage extends StatefulWidget {
   MainPage({Key? key}) : super(key: key);

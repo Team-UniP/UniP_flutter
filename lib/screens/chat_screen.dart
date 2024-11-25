@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:capstone_v1/screens/main_screen.dart';
+import 'package:capstone_v1/screens/notification_screen.dart';
 import 'package:capstone_v1/url/api_uri.dart';
 import 'package:flutter/material.dart';
 import 'package:capstone_v1/dto/chat_log.dart';
@@ -7,7 +9,6 @@ import 'package:capstone_v1/service/chat_service.dart';
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
 import 'package:stomp_dart_client/stomp_frame.dart';
-
 
 class ChatScreen extends StatefulWidget {
   final ChatRoom chatRoom; // ChatRoom 필드
@@ -25,7 +26,8 @@ class _ChatScreenState extends State<ChatScreen> {
   int page = 0; // 페이지 번호
   bool isLoading = false; // 로딩 상태 체크
 
-  TextEditingController _messageController = TextEditingController(); // TextEditingController 추가
+  TextEditingController _messageController =
+      TextEditingController(); // TextEditingController 추가
   final ScrollController _scrollController = ScrollController();
 
   // 메시지 가져오기
@@ -72,7 +74,7 @@ class _ChatScreenState extends State<ChatScreen> {
     stompClient = StompClient(
       config: StompConfig(
         // URL 스키마를 'ws://'로 변경
-        url: 'ws://${ApiInfo.domainUrl}/ws',  // http 대신 ws 사용
+        url: 'ws://${ApiInfo.domainUrl}/ws', // http 대신 ws 사용
         onConnect: (StompFrame frame) {
           print('웹소켓 연결 성공!');
 
@@ -115,8 +117,6 @@ class _ChatScreenState extends State<ChatScreen> {
     stompClient.activate();
   }
 
-
-
   @override
   void initState() {
     super.initState();
@@ -150,7 +150,8 @@ class _ChatScreenState extends State<ChatScreen> {
               child: IconButton(
                 icon: Icon(Icons.menu, color: Colors.purple, size: 30),
                 onPressed: () {
-                  // 메뉴 액션
+                  MainPage.mainPageKey.currentState
+                      ?.navigateToPage(1, NotificationScreen());
                 },
               ),
             ),
@@ -238,8 +239,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   onPressed: () async {
                     // 메시지 전송 액션
                     String message = _messageController.text;
-                    String roomId=widget.chatRoom.id;
-                    if(await chatApi.sendMessage(message,roomId)){
+                    String roomId = widget.chatRoom.id;
+                    if (await chatApi.sendMessage(message, roomId)) {
                       _messageController.clear();
                     }
                   },

@@ -1,12 +1,18 @@
-import 'package:capstone_v1/screens/create_party_screen.dart';
-import 'package:capstone_v1/screens/main_screen.dart';
-import 'package:capstone_v1/screens/party_detail_screen.dart';
-import 'package:capstone_v1/screens/routerequest_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:capstone_v1/service/party_service.dart';
+import 'package:capstone_v1/screens/main_screen.dart';
+import 'package:capstone_v1/screens/create_party_screen.dart';
+import 'package:capstone_v1/screens/party_detail_screen.dart';
+import 'package:capstone_v1/screens/routerequest_screen.dart';
 
-class PartyScreen extends StatelessWidget {
+class PartyScreen extends StatefulWidget {
+  @override
+  _PartyScreenState createState() => _PartyScreenState();
+}
+
+class _PartyScreenState extends State<PartyScreen> {
   final PartyService _partyService = PartyService();
+  String? selectedFilter; // Null indicates no filter is selected (show all)
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +49,6 @@ class PartyScreen extends StatelessWidget {
                 ),
               ),
               onPressed: () {
-                // A.I 버튼 클릭 시 동작
                 MainPage.mainPageKey.currentState
                     ?.navigateToPage(2, RouteRequestScreen());
               },
@@ -70,6 +75,17 @@ class PartyScreen extends StatelessWidget {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text('No parties available.'));
           } else {
+            // Filter the parties based on the selected filter
+            final filteredParties = snapshot.data!.where((party) {
+              if (selectedFilter == null) return true; // No filter selected
+              if (selectedFilter == 'COMPREHENSIVE') {
+                return party['partyType'] == 'COMPREHENSIVE' ||
+                    party['partyType'] ==
+                        null; // Include null for comprehensive
+              }
+              return party['partyType'] == selectedFilter;
+            }).toList();
+
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -78,14 +94,16 @@ class PartyScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildFilterOption('식사', 'assets/image/foodicon.png'),
-                      _buildFilterOption('음주', 'assets/image/drinkicon.png'),
-                      _buildFilterOption('종합', 'assets/image/totalicon.png'),
+                      _buildFilterOption(
+                          'RESTAURANT', 'assets/image/foodicon.png'),
+                      _buildFilterOption('BAR', 'assets/image/drinkicon.png'),
+                      _buildFilterOption(
+                          'COMPREHENSIVE', 'assets/image/totalicon.png'),
                     ],
                   ),
                   SizedBox(height: 20),
                   // Displaying list of party cards
-                  ...snapshot.data!
+                  ...filteredParties
                       .map((party) => _buildPartyCard(context, party))
                       .toList(),
                 ],
@@ -97,20 +115,40 @@ class PartyScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFilterOption(String label, String imagePath) {
-    return Column(
-      children: [
-        Image.asset(
-          imagePath,
-          width: 90,
-          height: 33,
-          fit: BoxFit.contain,
+  Widget _buildFilterOption(String filter, String imagePath) {
+    final isSelected = selectedFilter == filter;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          if (isSelected) {
+            selectedFilter = null; // Deselect if already selected
+          } else {
+            selectedFilter = filter; // Select the filter
+          }
+        });
+      },
+      child: Container(
+        decoration: isSelected
+            ? BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.purple, width: 2),
+              )
+            : null,
+        child: Column(
+          children: [
+            Image.asset(
+              imagePath,
+              width: 90,
+              height: 33,
+              fit: BoxFit.contain,
+            ),
+            SizedBox(height: 5),
+          ],
         ),
-      ],
+      ),
     );
   }
 
-  // Updated to properly handle data and format times
   Widget _buildPartyCard(BuildContext context, Map<String, dynamic> party) {
     String formatTime(String? time) {
       if (time == null) return '';
@@ -118,12 +156,11 @@ class PartyScreen extends StatelessWidget {
       return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')}/${dateTime.hour}시';
     }
 
-    final partyId = party['partyId']; // Get the party ID'
+    final partyId = party['partyId']; // Get the party ID
     final name = party['name'];
 
     return GestureDetector(
       onTap: () {
-        // Navigate to the detail screen with partyId
         MainPage.mainPageKey.currentState?.navigateToPage(
             2, PartyDetailScreen(partyId: partyId, name: name));
       },
@@ -233,7 +270,7 @@ class PartyScreen extends StatelessWidget {
       case 'COMPREHENSIVE':
         return 'assets/image/totalfliter.png';
       default:
-        return 'assets/image/drinkfilter.png';
+        return 'assets/image/totalfilter.png';
     }
   }
 }
