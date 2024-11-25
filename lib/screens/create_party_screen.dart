@@ -1,5 +1,6 @@
 import 'package:capstone_v1/screens/main_screen.dart';
 import 'package:capstone_v1/screens/party_screen.dart';
+import 'package:capstone_v1/service/chat_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:capstone_v1/service/party_service.dart';
@@ -16,6 +17,7 @@ class _CreatePartyScreenState extends State<CreatePartyScreen> {
   final TextEditingController _limitController = TextEditingController();
   final TextEditingController _startTimeController = TextEditingController();
   final TextEditingController _endTimeController = TextEditingController();
+  final ChatApi chatApi = ChatApi();
 
   String? _formattedStartTimeForServer;
   String? _formattedEndTimeForServer;
@@ -111,16 +113,23 @@ class _CreatePartyScreenState extends State<CreatePartyScreen> {
       "courses": _courses,
     };
 
-    bool success = await _partyService.createParty(partyData);
-    if (success) {
+    int partyId = await _partyService.createParty(partyData);
+
+    if (partyId < 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('파티 생성에 실패했습니다. 다시 시도해주세요.')),
+      );
+      MainPage.mainPageKey.currentState?.navigateToPage(2, PartyScreen());
+      return;
+    }
+
+    // 채팅방 생성 api를 호출해야 한다.
+    var bool = await chatApi.makeChatRoom(partyData['title'], partyId);
+    if(bool) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('파티가 성공적으로 생성되었습니다!')),
       );
       MainPage.mainPageKey.currentState?.navigateToPage(2, PartyScreen());
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('파티 생성에 실패했습니다. 다시 시도해주세요.')),
-      );
     }
   }
 
