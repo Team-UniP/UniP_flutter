@@ -69,6 +69,7 @@ class _RouteRecommendationScreenState extends State<RouteRecommendationScreen> {
         "title": widget.routeData['title'],
         "content": widget.routeData['content'],
         "limit": int.tryParse(_peopleController.text) ?? 0,
+        "partyType":"COMPREHENSIVE",
         "startTime": _formattedStartDate,
         "endTime": _formattedEndDate,
         "courses": widget.routeData['courses'],
