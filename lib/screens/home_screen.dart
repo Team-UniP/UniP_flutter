@@ -1,5 +1,6 @@
 import 'package:capstone_v1/screens/friends_screen.dart';
 import 'package:capstone_v1/screens/main_screen.dart';
+import 'package:capstone_v1/screens/notification_screen.dart';
 import 'package:capstone_v1/screens/party_screen.dart';
 import 'package:capstone_v1/service/friend_service.dart';
 import 'package:capstone_v1/service/my_service.dart';
@@ -61,7 +62,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   icon: Icon(Icons.notifications,
                                       color: Colors.black, size: 30),
                                   onPressed: () {
-                                    // Handle notification action
+                                    MainPage.mainPageKey.currentState
+                                        ?.navigateToPage(
+                                            0, NotificationScreen());
                                   },
                                 ),
                               ],
@@ -339,8 +342,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    buildCard('내장탕', 'LV.12', '32', '94',
-                        'https://via.placeholder.com/50x50', '2.'),
+                    buildCard('이경훈', 'LV.12', '32', '94',
+                        'assets/image/profileicon.png', '2.'),
 
                     // 가운데 카드: Transform으로 높이를 10% 정도 높게 조정
                     Transform.translate(
@@ -357,14 +360,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               height: 30,
                             ),
                           ),
-                          buildCard('감자탕', 'LV.12', '32', '94',
-                              'https://via.placeholder.com/50x50', ''),
+                          buildCard('김병웅', 'LV.12', '32', '94',
+                              'assets/image/profileicon.png', ''),
                         ],
                       ),
                     ),
 
-                    buildCard('수육국밥', 'LV.12', '32', '94',
-                        'https://via.placeholder.com/50x50', '3.'),
+                    buildCard('이현영', 'LV.12', '32', '94',
+                        'assets/image/profileicon.png', '3.'),
                   ],
                 ),
                 Container(
@@ -578,7 +581,7 @@ Widget buildCard(String title, String level, String completed, String points,
                   color: Color(0xFFE0F7FA),
                   shape: BoxShape.circle,
                   image: DecorationImage(
-                    image: NetworkImage(imageUrl),
+                    image: AssetImage(imageUrl),
                     fit: BoxFit.cover,
                   ),
                 ),

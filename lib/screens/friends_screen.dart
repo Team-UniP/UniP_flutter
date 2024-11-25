@@ -1,3 +1,5 @@
+import 'package:capstone_v1/screens/main_screen.dart';
+import 'package:capstone_v1/screens/notification_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:capstone_v1/service/friend_service.dart';
 
@@ -30,7 +32,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
             IconButton(
               icon: Icon(Icons.notifications, color: Colors.black, size: 30),
               onPressed: () {
-                // Add action
+                MainPage.mainPageKey.currentState
+                    ?.navigateToPage(3, NotificationScreen());
               },
             ),
           ],
